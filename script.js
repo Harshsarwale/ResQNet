@@ -22,9 +22,107 @@ let trackingId = null;
 
 let map = null;
 
+
 if (typeof L !== "undefined" && $("map")) {
-  // Initial view only. Actual GPS position is requested separately.
-  map = L.map("map").setView([18.5204, 73.8567], 11);
+  map = L.map("map", {
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    touchZoom: false,
+    boxZoom: false,
+    keyboard: false
+  }).setView([18.5204, 73.8567], 11);
+
+  // Add the interaction hint above the map.
+  const mapHint = document.createElement("div");
+  mapHint.className = "map-interaction-hint";
+  mapHint.id = "mapHint";
+  mapHint.textContent =
+    "🖱️ Double-click or double-tap the map to enable map controls.";
+
+  $("map").parentNode.insertBefore(mapHint, $("map"));
+
+  let mapUnlocked = false;
+  let unlockTimer = null;
+
+  function unlockMap() {
+    mapUnlocked = true;
+
+    map.dragging.enable();
+    map.scrollWheelZoom.enable();
+    map.doubleClickZoom.enable();
+    map.touchZoom.enable();
+    map.boxZoom.enable();
+    map.keyboard.enable();
+
+    mapHint.classList.add("active");
+    mapHint.textContent =
+      "Map controls enabled. Click Done to return to page scrolling.";
+
+    clearTimeout(unlockTimer);
+  }
+
+  function lockMap() {
+    mapUnlocked = false;
+
+    map.dragging.disable();
+    map.scrollWheelZoom.disable();
+    map.doubleClickZoom.disable();
+    map.touchZoom.disable();
+    map.boxZoom.disable();
+    map.keyboard.disable();
+
+    mapHint.classList.remove("active");
+    mapHint.textContent =
+      "🖱️ Double-click or double-tap the map to enable map controls.";
+  }
+
+  // Double-click with a mouse.
+  $("map").addEventListener("dblclick", unlockMap);
+
+  // Double-tap on touchscreens.
+  let lastTap = 0;
+
+  $("map").addEventListener("touchend", () => {
+    const now = Date.now();
+
+    if (now - lastTap < 350) {
+      unlockMap();
+    }
+
+    lastTap = now;
+  }, { passive: true });
+
+  // Exit map interaction when the user clicks outside it.
+  document.addEventListener("pointerdown", (event) => {
+    if (mapUnlocked && !$("map").contains(event.target)) {
+      lockMap();
+    }
+  });
+
+  // Add a Done button to exit map interaction explicitly.
+  const doneButton = document.createElement("button");
+  doneButton.type = "button";
+  doneButton.className = "button secondary";
+  doneButton.textContent = "Done with map";
+  doneButton.style.display = "none";
+
+  mapHint.after(doneButton);
+
+  $("map").addEventListener("dblclick", () => {
+    doneButton.style.display = "inline-flex";
+  });
+
+  $("map").addEventListener("touchend", () => {
+    if (mapUnlocked) {
+      doneButton.style.display = "inline-flex";
+    }
+  });
+
+  doneButton.addEventListener("click", () => {
+    lockMap();
+    doneButton.style.display = "none";
+  });
 
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
