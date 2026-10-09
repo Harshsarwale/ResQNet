@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10243a">
+  <title>ResQNet | Emergency Response Network</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Interactive map library -->
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          defer></script>
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <a href="#" class="brand">
+      <span class="brand-icon">✚</span>
+      <span>ResQ<span class="accent">Net</span>
+        <small>CLIMATE-AWARE RESPONSE</small>
+      </span>
+    </a>
+
+    <span class="system-status">
+      <span class="status-dot"></span> Response dashboard
+    </span>
+    <a class="header-emergency" href="tel:112">☎ Emergency: 112</a>
+  </header>
+
+  <main class="container">
+    <section class="welcome">
+      <div>
+        <p class="eyebrow">COMMUNITY SAFETY PLATFORM</p>
+        <h1>Be prepared. Stay safe.</h1>
+        <p class="muted">
+          Monitor hazards, share your location and reach emergency help.
+        </p>
+      </div>
+      <div class="date-chip" id="currentDate">Emergency response</div>
+    </section>
+
+    <!-- Main emergency actions -->
+    <section class="hero-grid">
+      <article class="card sos-card">
+        <span class="eyebrow light">NEED URGENT HELP?</span>
+        <h2>Emergency SOS</h2>
+        <p>
+          Use this shortcut to call India's emergency response number.
+          If possible, tell the operator your exact location.
+        </p>
+        <a class="sos-button" href="tel:112">☎ CALL 112 NOW</a>
+        <p class="small light">
+          This opens your device's phone app. It does not automatically
+          send your location to authorities.
+        </p>
+      </article>
+
+      <article class="card quick-card">
+        <h2>Quick emergency contacts</h2>
+        <p class="muted">Tap a number to call.</p>
+        <a class="contact-row" href="tel:112">
+          <span class="contact-icon red">✚</span>
+          <span><strong>National emergency</strong><small>Police, fire and urgent help</small></span>
+          <b>112 ↗</b>
+        </a>
+        <a class="contact-row" href="tel:101">
+          <span class="contact-icon orange">♨</span>
+          <span><strong>Fire and rescue</strong><small>Fire-related emergencies</small></span>
+          <b>101 ↗</b>
+        </a>
+        <a class="contact-row" href="tel:108">
+          <span class="contact-icon green">✚</span>
+          <span><strong>Medical assistance</strong><small>Ambulance / medical help</small></span>
+          <b>108 ↗</b>
+        </a>
+        <a class="contact-row" href="tel:181">
+          <span class="contact-icon purple">♥</span>
+          <span><strong>Women in distress</strong><small>Women’s helpline</small></span>
+          <b>181 ↗</b>
+        </a>
+      </article>
+    </section>
+
+    <!-- Dashboard stats -->
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-icon">⚠</span>
+        <p>Reports submitted</p>
+        <h2 id="reportCount">0</h2>
+        <small>In this browser session</small>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon">📍</span>
+        <p>GPS status</p>
+        <h2 id="gpsSummary">Off</h2>
+        <small>Location requires permission</small>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon">🌦</span>
+        <p>Alert feed</p>
+        <h2>Demo</h2>
+        <small>Not an official live warning feed</small>
+      </article>
+    </section>
+
+    <!-- Real interactive map -->
+    <section class="card section-card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">LOCATION SERVICES</p>
+          <h2>Live emergency map</h2>
+          <p class="muted">Find your position and mark a hazard on the map.</p>
+        </div>
+        <span class="tag">Interactive map</span>
+      </div>
+
+      <div class="button-row">
+        <button id="locateBtn" class="button primary" type="button">
+          ◎ Find my location
+        </button>
+        <button id="stopTrackingBtn" class="button secondary" type="button">
+          Stop tracking
+        </button>
+        <button id="mapResetBtn" class="button secondary" type="button">
+          Reset map
+        </button>
+      </div>
+
+      <p id="locationStatus" class="notice" role="status" aria-live="polite">
+        Loading map...
+      </p>
+      <div id="map" aria-label="Interactive emergency map"></div>
+      <p class="small muted">
+        Map data © OpenStreetMap contributors. Map clicks create demo markers
+        only; they do not notify rescue services.
+      </p>
+    </section>
+
+    <section class="content-grid">
+      <!-- SMS feature -->
+      <article class="card section-card">
+        <p class="eyebrow">PERSONAL SAFETY</p>
+        <h2>Send an emergency SMS</h2>
+        <p class="muted">
+          Prepare a message for a trusted contact. Your messaging app will
+          open so you can review and send it.
+        </p>
+
+        <form id="smsForm">
+          <label for="contactName">Contact name</label>
+          <input id="contactName" placeholder="e.g. Family member">
+
+          <label for="contactPhone">Contact mobile number</label>
+          <input id="contactPhone" type="tel"
+                 placeholder="e.g. +91 9876543210" required>
+
+          <label for="smsSituation">Message</label>
+          <select id="smsSituation">
+            <option value="I need emergency assistance.">I need help</option>
+            <option value="There is flooding near my location.">
+              Flooding
+            </option>
+            <option value="There is a fire near my location.">
+              Fire
+            </option>
+            <option value="There has been an accident.">
+              Accident
+            </option>
+            <option value="I need medical assistance.">
+              Medical emergency
+            </option>
+          </select>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="includeLocation" checked>
+            Include my GPS coordinates if available
+          </label>
+
+          <button class="button primary full-width" type="submit">
+            ✉ Prepare emergency SMS
+          </button>
+        </form>
+        <p id="smsStatus" class="notice" role="status"></p>
+      </article>
+
+      <!-- Emergency reporting -->
+      <article class="card section-card">
+        <p class="eyebrow">INCIDENT MANAGEMENT</p>
+        <h2>Report an emergency</h2>
+        <p class="muted">
+          Record a hazard and its severity for this demo dashboard.
+        </p>
+
+        <form id="reportForm">
+          <label for="reportType">Emergency type</label>
+          <select id="reportType" required>
+            <option value="Flood">Flood / waterlogging</option>
+            <option value="Fire">Fire / smoke</option>
+            <option value="Road accident">Road accident</option>
+            <option value="Landslide">Landslide</option>
+            <option value="Severe weather">Severe weather</option>
+            <option value="Medical">Medical emergency</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label for="severity">Severity</label>
+          <select id="severity" required>
+            <option value="High">High — immediate danger</option>
+            <option value="Medium">Medium — urgent</option>
+            <option value="Low">Low — monitor</option>
+          </select>
+
+          <label for="reportDescription">What happened?</label>
+          <textarea id="reportDescription" rows="3"
+                    placeholder="Describe the hazard and nearby landmarks..."
+                    required></textarea>
+
+          <label for="reportLocation">Location / landmark</label>
+          <input id="reportLocation"
+                 placeholder="Street, area or nearby landmark">
+
+          <button class="button primary full-width" type="submit">
+            + Record incident
+          </button>
+        </form>
+        <p id="reportStatus" class="notice" role="status"></p>
+      </article>
+    </section>
+
+    <!-- Demo alerts -->
+    <section class="card section-card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">HAZARD MONITORING</p>
+          <h2>Community alerts</h2>
+        </div>
+        <span class="tag warning-tag">Sample data</span>
+      </div>
+      <p class="muted">
+        These examples are for demonstration only and are not current
+        warnings or verified incidents.
+      </p>
+
+      <div class="alerts-grid">
+        <article class="alert-item">
+          <span class="alert-symbol">🌧</span>
+          <div>
+            <span class="severity medium">MEDIUM · DEMO</span>
+            <h3>Heavy rainfall</h3>
+            <p>Example: monitor low-lying roads and drains.</p>
+          </div>
+        </article>
+        <article class="alert-item">
+          <span class="alert-symbol">🌊</span>
+          <div>
+            <span class="severity high">HIGH · DEMO</span>
+            <h3>Flood risk</h3>
+            <p>Example: avoid flooded roads and flowing water.</p>
+          </div>
+        </article>
+        <article class="alert-item">
+          <span class="alert-symbol">🌬</span>
+          <div>
+            <span class="severity low">LOW · DEMO</span>
+            <h3>Severe weather watch</h3>
+            <p>Example: secure loose outdoor objects.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Hospitals -->
+    <section class="card section-card">
+      <p class="eyebrow">MEDICAL SUPPORT</p>
+      <h2>Find nearby hospitals</h2>
+      <p class="muted">
+        Search OpenStreetMap for nearby hospitals. Results depend on map data
+        and internet access; verify availability by phone.
+      </p>
+      <button id="hospitalBtn" class="button secondary" type="button">
+        Find hospitals near my location
+      </button>
+      <a id="hospitalLink" class="text-link" target="_blank"
+         rel="noopener noreferrer" hidden>
+        Open hospital search ↗
+      </a>
+      <p id="hospitalStatus" class="notice" role="status"></p>
+    </section>
+
+    <footer class="footer">
+      <strong>ResQNet</strong> · Hackathon prototype
+      <p>Not a replacement for official emergency services.</p>
+      <a href="https://112.gov.in/" target="_blank" rel="noopener noreferrer">
+        Official India emergency response information ↗
+      </a>
+    </footer>
+  </main>
+</body>
+</html>
