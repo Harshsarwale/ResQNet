@@ -622,3 +622,28 @@ textarea::placeholder {
     flex: 1 1 140px;
   }
 }
+
+/* Map scrolling and interaction control */
+#map {
+  touch-action: pan-y;
+}
+
+/* Show a clear message while the map is locked */
+.map-wrapper {
+  position: relative;
+}
+
+.map-interaction-hint {
+  padding: 10px 14px;
+  margin: 10px 0;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 13px;
+  text-align: center;
+}
+
+.map-interaction-hint.active {
+  background: #dcfce7;
+  color: #166534;
+}
